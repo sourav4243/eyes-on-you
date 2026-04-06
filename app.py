@@ -2,6 +2,7 @@ import cv2
 import streamlit as st
 from core.face_tracker import FaceTracker
 from core.pose_estimator import PoseEstimator
+from core.object_detector import ObjectDetector
 
 # UI
 st.set_page_config(page_title="Eyes On You", layout="wide")
@@ -19,6 +20,7 @@ frame_window = st.image([])
 # initialize ai models
 tracker = FaceTracker()
 pose = PoseEstimator()
+detector = ObjectDetector()
 
 # Main application loop
 camera = cv2.VideoCapture(0)
@@ -35,6 +37,7 @@ while run:
     # process frame through both models
     face_count = tracker.process(frame_rgb)
     looking_away = pose.process(frame_rgb, face_count)
+    object_detected = detector.process(frame_rgb)
 
     # Alert logic
     if face_count == 0:
@@ -43,6 +46,9 @@ while run:
     elif face_count > 1:
         cv2.putText(frame_rgb, f"ALERT: MULTIPLE FACES ({face_count})", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
         alert_placeholder.error(f"Violation: Multiple people detected ({face_count})!")
+    elif object_detected: 
+        cv2.putText(frame_rgb, "ALERT: PHONE/BOOK DETECTED", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
+        alert_placeholder.error("Violation: Unauthorized object detected!")
     elif looking_away:
         cv2.putText(frame_rgb, "WARNING: LOOKING AWAY", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 165, 0), 3)
         alert_placeholder.warning("Warning: Candidate looking away from screen!")
