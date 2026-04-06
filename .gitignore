@@ -1,2 +1,9 @@
-/venv
+venv/
+__pycache__/
+*.pyc
 .python-version
+
+models/
+*.pt
+
+data/
